@@ -38,6 +38,36 @@ app.get('/todos',(req,res)=>{
     });
 });
 
+//get by id /todos.123456
+app.get('/todos/:id',(req,res)=>{
+    var id=req.params.id;
+    //valid id using isValid
+        //404 - send back empty send
+    const {ObjectId}=require('mongodb');
+    if(!ObjectId.isValid(id)){
+
+        return res.status(404).send({});
+    }
+
+
+
+    //findById
+        //succsess
+            //if todo-send it back
+            //if no todo - send back 404 with empty body
+        //error
+            //400- and send empty body
+    Todo.findById(id).then((todo)=>{
+        if(!todo){
+            return res.status(404).send({});
+        }
+           res.status(200).send({todo});
+
+    },(e)=>{
+        res.status(400).send(e);
+
+        });
+    });
 app.listen(3000,()=>{
     console.log('Started on port 3000');
 })
