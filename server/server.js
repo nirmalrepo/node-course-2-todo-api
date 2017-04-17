@@ -1,8 +1,10 @@
 /**
  * Created by nirmal on 4/16/17.
  */
-var express=require('express');
-var bodyParser=require('body-parser');
+const _=require('lodash');
+const express=require('express');
+const bodyParser=require('body-parser');
+const {ObjectId}=require('mongodb');
 
 var {mongoose}=require('./db/mongoose');
 var {Todo}=require('./models/todo');
@@ -46,7 +48,7 @@ app.get('/todos/:id',(req,res)=>{
     var id=req.params.id;
     //valid id using isValid
         //404 - send back empty send
-    const {ObjectId}=require('mongodb');
+
     if(!ObjectId.isValid(id)){
 
         return res.status(404).send({});
@@ -75,7 +77,6 @@ app.get('/todos/:id',(req,res)=>{
 app.delete('/todos/:id',(req,res)=>{
 
     var id=req.params.id;
-    const {ObjectId}=require('mongodb');
     if(!ObjectId.isValid(id)){
 
         return res.status(404).send({});
@@ -91,6 +92,32 @@ app.delete('/todos/:id',(req,res)=>{
 
     });
 
+});
+
+
+//update
+app.patch('/todos/:id',(req,res)=>{
+    var id=req.params.id;
+    var body =_.pick(req.body,['text','completed']) //important:here we take body from request and map with our required object attribute using loadash
+    if(!ObjectId.isValid(id)){
+
+        return res.status(404).send({});
+    }
+    if(_.isBoolean(body.completed) && body.completed){
+        body.completedAt=new Date().getTime();
+    }else {
+        body.completed=false;
+        body.completedAt=null
+    }
+
+    Todo.findByIdAndUpdate(id,{$set:body},{new:true}).then((todo)=>{
+        if(!todo){
+            return res.status(404).send({});
+        }
+        res.status(200).send({todo});
+    }).catch((e)=>{
+        res.status(400).send(e);
+    });
 });
 app.listen(port,()=>{
     console.log(`Started on port ${port}`);
