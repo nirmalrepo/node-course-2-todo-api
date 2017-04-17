@@ -1,6 +1,9 @@
 /**
  * Created by nirmal on 4/16/17.
  */
+
+require('./config/config');
+
 const _=require('lodash');
 const express=require('express');
 const bodyParser=require('body-parser');
@@ -13,7 +16,7 @@ var {User}=require('./models/user');
 var app=express();
 
 //heroku port confgurations
-const port=process.env.PORT||3000;
+const port=process.env.PORT;
 
 //middleware
 app.use(bodyParser.json());
