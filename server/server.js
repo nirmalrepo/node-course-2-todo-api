@@ -10,7 +10,7 @@ var {User}=require('./models/user');
 
 var app=express();
 
-//heroku port confguration
+//heroku port confgurations
 const port=procss.env.PORT||3000;
 
 //middleware
