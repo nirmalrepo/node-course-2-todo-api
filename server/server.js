@@ -12,6 +12,7 @@ const {ObjectId}=require('mongodb');
 var {mongoose}=require('./db/mongoose');
 var {Todo}=require('./models/todo');
 var {User}=require('./models/user');
+var {authenticate}=require('./middleware/authenticate');
 
 var app=express();
 
@@ -139,6 +140,26 @@ app.post('/users',(req,res)=>{
 
     });
 });
+
+
+
+
+app.get('/users/me',authenticate,(req,res)=>{
+        res.send(req.user);
+});
+//old one
+// app.get('/users/me',authenticate,(req,res)=>{
+//     var token=req.header('x-auth');
+//     //Model method
+//     User.findByToken(token).then((user)=>{
+//         if(!user){
+//             return Promise.reject();
+//         }
+//         res.send(user);
+//     }).catch((e)=>{
+//         res.status(401).send();
+//     });
+// });
 
 app.listen(port,()=>{
     console.log(`Started on port ${port}`);
