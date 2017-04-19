@@ -5,6 +5,7 @@ const mongoose=require('mongoose');
 const validator=require('validator');
 const jwt=require('jsonwebtoken');
 const _=require('lodash');
+const bycrypt=require('bcryptjs');
 
 var UserSchema=new mongoose.Schema({
     email:{
@@ -80,6 +81,26 @@ UserSchema.statics.findByToken=function (token) {
         'tokens.access':'auth'
     })
 }
+
+//This middleware run prior to save function to hash password
+UserSchema.pre('save',function (next) {
+    var user=this;
+    //to avoid hashing password again and again this run when user modified the passworf
+    if(user.isModified('password')){
+
+        // generate salt then hash
+        var password=user.password;
+        bycrypt.genSalt(10,(err,salt)=>{
+            bycrypt.hash(password,salt,(err,hash)=>{
+                user.password=hash;
+                next();
+            });
+        });
+    }else {
+        next();
+    }
+});
+
 //create a model for users
 var User=mongoose.model('Users',UserSchema);
 
