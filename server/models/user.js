@@ -82,6 +82,30 @@ UserSchema.statics.findByToken=function (token) {
     })
 }
 
+UserSchema.statics.findByCredentials=function (email, password) {
+    var User=this;
+
+
+    return User.findOne({email}).then((user)=>{
+
+        if(!user){
+            return Promise.reject();
+        }
+        //bycrypt.compare only supports call backs but we use onsode promise
+        return new Promise((resolve,reject)=>{
+            bycrypt.compare(password,user.password,(err,res)=>{
+                if(res){
+                    resolve(user);
+                }else{
+
+                    reject();
+                }
+            });
+
+        })
+    })
+}
+
 //This middleware run prior to save function to hash password
 UserSchema.pre('save',function (next) {
     var user=this;
