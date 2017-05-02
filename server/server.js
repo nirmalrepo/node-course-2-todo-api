@@ -22,10 +22,11 @@ const port=process.env.PORT;
 //middleware
 app.use(bodyParser.json());
 
-app.post('/todos',(req,res)=>{
+app.post('/todos',authenticate,(req,res)=>{
 
     var todo=new Todo({
-        text:req.body.text
+        text:req.body.text,
+        _creator:req.user._id
     });
 
     todo.save().then((doc)=>{
@@ -36,8 +37,9 @@ app.post('/todos',(req,res)=>{
     });
 });
 //Listing todos
-app.get('/todos',(req,res)=>{
-    Todo.find().then((todos)=>{
+app.get('/todos',authenticate,(req,res)=>{
+    //find query with user is equal to req.user._id from authenticate
+    Todo.find({_creator:req.user._id}).then((todos)=>{
         res.send({
             todos
         })
@@ -48,7 +50,7 @@ app.get('/todos',(req,res)=>{
 });
 
 //get by id /todos.123456
-app.get('/todos/:id',(req,res)=>{
+app.get('/todos/:id',authenticate,(req,res)=>{
     var id=req.params.id;
     //valid id using isValid
         //404 - send back empty send
@@ -66,7 +68,10 @@ app.get('/todos/:id',(req,res)=>{
             //if no todo - send back 404 with empty body
         //error
             //400- and send empty body
-    Todo.findById(id).then((todo)=>{
+    Todo.findOne({
+        _id:id,
+        _creator:req.user._id
+    }).then((todo)=>{
         if(!todo){
             return res.status(404).send({});
         }
@@ -78,14 +83,18 @@ app.get('/todos/:id',(req,res)=>{
         });
     });
 
-app.delete('/todos/:id',(req,res)=>{
+app.delete('/todos/:id',authenticate,(req,res)=>{
 
     var id=req.params.id;
     if(!ObjectId.isValid(id)){
 
         return res.status(404).send({});
     }
-    Todo.findByIdAndRemove(id).then((todo)=>{
+    //findByIdAndRemove is previously used
+    Todo.findOneAndRemove({
+        _id:id,
+        _creator:req.user._id
+    }).then((todo)=>{
         if(!todo){
             return res.status(404).send({});
         }
@@ -100,7 +109,7 @@ app.delete('/todos/:id',(req,res)=>{
 
 
 //update
-app.patch('/todos/:id',(req,res)=>{
+app.patch('/todos/:id',authenticate,(req,res)=>{
     var id=req.params.id;
     var body =_.pick(req.body,['text','completed']) //important:here we take body from request and map with our required object attribute using loadash
     if(!ObjectId.isValid(id)){
@@ -114,7 +123,7 @@ app.patch('/todos/:id',(req,res)=>{
         body.completedAt=null
     }
 
-    Todo.findByIdAndUpdate(id,{$set:body},{new:true}).then((todo)=>{
+    Todo.findOneAndUpdate({_id:id,_creator:req.user._id},{$set:body},{new:true}).then((todo)=>{
         if(!todo){
             return res.status(404).send({});
         }

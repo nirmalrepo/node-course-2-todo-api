@@ -17,7 +17,13 @@ var Todo=mongoose.model('Todo',{
     completedAt:{
         type:Number,
         default:null
+    },
+    _creator:{
+        //user property
+        type:mongoose.Schema.Types.ObjectId,
+        required:true
     }
+
 });
 
 // // cerate document
