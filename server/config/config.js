@@ -29,5 +29,8 @@ if(env==='development' || env==='test'){
 // heroku configs
 // 1.heroku config
 // 2.heroku config:set JWT_SECRET=addffadsd34335hj
+// 2.heroku config:get JWT_SECRET
 // 3.heroku config:unset JWT_SECRET
 
+// mongodb://root:root@ds161950.mlab.com:61950/todoapp
+//    mongodb://username:password@address:port/database
